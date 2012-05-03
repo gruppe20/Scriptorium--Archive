@@ -5,6 +5,9 @@ source "http://rubygems.org"
 # development dependencies will be added by default to the :development group.
 gemspec
 
+# Savon SOAP client
+gem "savon"
+
 # jquery-rails is used by the dummy application
 gem "jquery-rails"
 
