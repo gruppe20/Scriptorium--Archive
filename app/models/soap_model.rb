@@ -1,6 +1,6 @@
 require "savon"
 
-class SOAP {
+class SOAP < ActiveRecord::Base {
   def get_fonds_series
     client = Savon::Client.new("http://ark1.hio.no/n5/Noark5BaseService3?wsdl")
     result = client.request :ser, :fonds_get_series, body: "c8637365-8691-4ef8-aae3-a2d7df757dd1"
