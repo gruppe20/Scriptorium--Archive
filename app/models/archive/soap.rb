@@ -140,15 +140,23 @@ module Archive
                   end
       file_hash = file_result.to_hash[:document_get_response]
       result[:"base64_data"] = file_hash
-      decode_file(result)
+      result[:"file_path"] = decode_file(result)
+      result.delete(:base64_data) # Releasing som memory hungry stuff
+      return result
     end
     
     def decode_file(hash)
       f = StringIO.new
-      open(hash[:title] +"."+ hash[:format], "w+b") do
+      open(hash[:title] +"."+ hash[:format], "w+b") do# |f|
         f << Base64.decode64(hash[:base64_data])
       end
-      return f
+      puts "\nf contents:\n#{f.string}\n"
+      file = Tempfile.open([hash[:title], "."+ hash[:format]], "#{Rails.root}/tmp").binmode
+      begin
+        file << f.string
+        file.flush
+      end
+      return file.path
     end  
   end
 end
