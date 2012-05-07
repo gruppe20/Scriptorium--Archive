@@ -1,4 +1,4 @@
 Rails.application.routes.draw do
 
-  mount Archive::Engine => "/archive"
+  mount Archive::Engine => "/"
 end

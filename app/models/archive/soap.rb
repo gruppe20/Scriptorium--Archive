@@ -9,7 +9,7 @@ module Archive
      # @@seriesUUID = "a290da90-a312-47ca-8c65-8505cd46bb64" # test
     end
     
-    def get_fonds_series
+    def get_fonds_series(system_id)
       result = @@client.request :ser, :fonds_get_series, body: @@fondUUID
       data = result.to_hash[:fonds_get_series_response][:item]
     end
@@ -150,7 +150,6 @@ module Archive
       open(hash[:title] +"."+ hash[:format], "w+b") do# |f|
         f << Base64.decode64(hash[:base64_data])
       end
-      puts "\nf contents:\n#{f.string}\n"
       file = Tempfile.open([hash[:title], "."+ hash[:format]], "#{Rails.root}/tmp").binmode
       begin
         file << f.string
