@@ -1,17 +1,80 @@
-// Place all the behaviors and hooks related to the matching controller here.
-// All this logic will automatically be available in application.js.
 $(document).ready(function() {
 	$.ajax({
 		type: "POST",
 		url: "/ajax/get_series",
 		data: "fond_id=66b2ed65-901c-437d-9d72-564dd00b3ef1"
 	}).done(function(data) {
-		for(var i=0; i < data.length; i++)
-			$("#students").append("<option value=\""+data[i]["system_id"]+"\" >"+data[i]["title"]+"</option>");
+		update_data(data, "#students");
 	});
 	
 	$(document).off('click', '#students');
 	$(document).on('click', '#students', function(e) {
-		$(this).attr("value");
+		$.ajax({
+			type: "POST",
+			url: "ajax/get_case_files",
+			data: "series_id="+$(this).attr("value")
+		}).done(function(data) {
+			update_data(data, "#subjects");
+		});
+	});
+	
+	$(document).off('click', '#subjects');
+	$(document).on('click', '#subjects', function(e) {
+		$.ajax({
+			type: "POST",
+			url: "ajax/get_child_case_files",
+			data: "case_file_id="+$(this).attr("value")
+		}).done(function(data) {
+			update_data(data, "#assignment");
+		});
+	});
+	
+	$(document).off('click', '#assignment');
+	$(document).on('click', '#assignment', function(e) {
+		$.ajax({
+			type: "POST",
+			url: "ajax/get_records",
+			data: "case_file_id="+$(this).attr("value")
+		}).done(function(data) {
+			update_data(data, "#record");
+		});
+	});
+	
+	$(document).off('click', '#record');
+	$(document).on('click', '#record', function(e) {
+		console.log($(this).attr("value"));
+		$.ajax({
+			type: "POST",
+			url: "ajax/get_record",
+			data: "record_id="+$(this).attr("value")
+		}).done(function(data) {
+			console.log(data);
+			holder = $("#record_details");
+			holder.find("#record_msg").html(data["description"]);
+			holder.find("#file_name").html(data["title"]);		
+		});
+	});
+	
+	$(document).off('click', '#get_file');
+	$(document).on('click', '#get_file', function(e) {
+		$.ajax({
+			type: "GET",
+			url: "ajax/get_file",
+			data: "file_id="+$(this).attr("value")
+		});
 	});
 });
+
+function update_data(data, field) {
+	$(field).html("");
+	$(field).nextAll().html("");
+	if(data == null)
+		return;
+		
+	if(data instanceof Array) {
+		for(var i=0; i < data.length; i++)
+			$(field).append("<option value=\""+data[i]["system_id"]+"\" >"+data[i]["title"]+"</option>");
+	} else {
+		$(field).append("<option value=\""+data["system_id"]+"\" >"+data["title"]+"</option>");
+	}
+}

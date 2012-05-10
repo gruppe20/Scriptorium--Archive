@@ -1,4 +1,21 @@
-/*
-  Place all the styles related to the matching controller here.
-  They will automatically be included in application.css.
-*/
+select {
+	height: 300px;
+	width: 200px;
+	font-size: 25px;
+}
+
+#record_details {
+	height: 300px;
+	width: 200px;
+	font-size: 25px;
+	position: absolute;
+	top: 0;
+	right: 0;
+}
+
+#get_file {
+	background: lightblue;
+	padding: 3px;
+	border: 1px solid gray;
+	border-radius: 25px;
+}

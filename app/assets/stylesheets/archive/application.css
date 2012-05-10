@@ -6,6 +6,10 @@
  *= require_tree . 
 */
 
+body {
+	font-family: Verdana, sans-serif;
+}
+
 .data {
 	background: blue;
 }

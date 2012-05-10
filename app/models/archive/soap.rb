@@ -28,6 +28,97 @@ module Archive
       series[:system_id]
     end
     
+    def get_case_files(system_id)
+      result = @@client.request :ser, :series_get_case_files do |soap|
+                  soap.xml = "<soapenv:Envelope xmlns:soapenv=\"http://schemas.xmlsoap.org/soap/envelope/\" xmlns:ser=\"http://service3.base.module.n5ic/\">
+                     <soapenv:Header/>
+                     <soapenv:Body>
+                        <ser:seriesGetCaseFiles>"+system_id+"</ser:seriesGetCaseFiles>
+                     </soapenv:Body>
+                  </soapenv:Envelope>"
+                end
+      result.to_hash[:series_get_case_files_response][:item]
+    end
+    
+    def get_child_case_files(system_id)
+      result = @@client.request :ser, :series_get_child_case_files do |soap|
+                soap.xml = "<soapenv:Envelope xmlns:soapenv=\"http://schemas.xmlsoap.org/soap/envelope/\" xmlns:ser=\"http://service3.base.module.n5ic/\">
+                   <soapenv:Header/>
+                   <soapenv:Body>
+                      <ser:caseFileGetChildCaseFiles>"+system_id+"</ser:caseFileGetChildCaseFiles>
+                   </soapenv:Body>
+                </soapenv:Envelope>"
+               end
+      result.to_hash[:case_file_get_child_case_files_response][:item]
+    end
+    
+    def get_registry_entries(system_id)
+      result = @@client.request :ser, :case_file_get_registry_entries do |soap|
+                  soap.xml = "<soapenv:Envelope xmlns:soapenv=\"http://schemas.xmlsoap.org/soap/envelope/\" xmlns:ser=\"http://service3.base.module.n5ic/\">
+                     <soapenv:Header/>
+                     <soapenv:Body>
+                        <ser:caseFileGetRegistryEntries>"+system_id+"</ser:caseFileGetRegistryEntries>
+                     </soapenv:Body>
+                  </soapenv:Envelope>"
+               end
+      result.to_hash[:case_file_get_registry_entries_response][:item]
+    end
+    
+    def get_record(system_id)
+      result =    @@client.request :ser, :registry_entry_get_document_description do |soap|
+                    soap.xml = "<soapenv:Envelope xmlns:soapenv=\"http://schemas.xmlsoap.org/soap/envelope/\" xmlns:ser=\"http://service3.base.module.n5ic/\">
+                       <soapenv:Header/>
+                       <soapenv:Body>
+                          <ser:registryEntryGetDocumentDescriptions>"+system_id+"</ser:registryEntryGetDocumentDescriptions>
+                       </soapenv:Body>
+                    </soapenv:Envelope>"
+                  end
+      result.to_hash[:registry_entry_get_document_descriptions_response][:item].first
+    end
+    
+    def get_file_info(file_id)
+      result =    @@client.request :ser, :document_description_get_document_objects do |soap|
+                    soap.xml = "<soapenv:Envelope xmlns:soapenv=\"http://schemas.xmlsoap.org/soap/envelope/\" xmlns:ser=\"http://service3.base.module.n5ic/\">
+                       <soapenv:Header/>
+                       <soapenv:Body>
+                          <ser:documentDescriptionGetDocumentObjects>"+file_id+"</ser:documentDescriptionGetDocumentObjects>
+                       </soapenv:Body>
+                    </soapenv:Envelope>"
+                  end
+      result_hash = result.to_hash[:document_description_get_document_objects_response][:item]
+                  
+      extra =     @@client.request :ser, :document_object_get_document_description do |soap|
+                    soap.xml = "<soapenv:Envelope xmlns:soapenv=\"http://schemas.xmlsoap.org/soap/envelope/\" xmlns:ser=\"http://service3.base.module.n5ic/\">
+                       <soapenv:Header/>
+                       <soapenv:Body>
+                          <ser:documentObjectGetDocumentDescription>"+result_hash[:system_id]+"</ser:documentObjectGetDocumentDescription>
+                       </soapenv:Body>
+                    </soapenv:Envelope>"
+                  end
+      extra_hash = extra.to_hash[:document_object_get_document_description_response]
+      result_hash[:"title"] = extra_hash[:title]
+      result_hash[:"document_type"] = extra_hash[:document_type]
+      result_hash[:"description"] = extra_hash[:description]
+      return result_hash
+    end
+    
+    def get_file(file_id)
+      result = get_file_info(file_id)
+      file_result =    @@client.request :ser, :document_get do |soap|
+                    soap.xml = "<soapenv:Envelope xmlns:soapenv=\"http://schemas.xmlsoap.org/soap/envelope/\" xmlns:ser=\"http://service3.base.module.n5ic/\">
+                       <soapenv:Header/>
+                       <soapenv:Body>
+                          <ser:documentGet>"+file_id+"</ser:documentGet>
+                       </soapenv:Body>
+                    </soapenv:Envelope>"
+                  end
+      file_hash = file_result.to_hash[:document_get_response]
+      result[:"base64_data"] = file_hash
+      result[:"file_path"] = decode_file(result)
+      result.delete(:base64_data) # Releasing som memory hungry stuff
+      return result
+    end
+    
     def create_file(series, title, officialTitle, desc, docMedium, createdBy)
       parent_id = get_specific_series_uuid(series)
       result =  @@client.request :ser, :case_create_file do |soap|
@@ -100,49 +191,6 @@ module Archive
                     </soapenv:Envelope>"
                   end
       result.to_hash
-    end
-    
-    def get_file_info(file_id)
-      result =    @@client.request :ser, :document_description_get_document_objects do |soap|
-                    soap.xml = "<soapenv:Envelope xmlns:soapenv=\"http://schemas.xmlsoap.org/soap/envelope/\" xmlns:ser=\"http://service3.base.module.n5ic/\">
-                       <soapenv:Header/>
-                       <soapenv:Body>
-                          <ser:documentDescriptionGetDocumentObjects>"+file_id+"</ser:documentDescriptionGetDocumentObjects>
-                       </soapenv:Body>
-                    </soapenv:Envelope>"
-                  end
-      result_hash = result.to_hash[:document_description_get_document_objects_response][:item]
-                  
-      extra =     @@client.request :ser, :document_object_get_document_description do |soap|
-                    soap.xml = "<soapenv:Envelope xmlns:soapenv=\"http://schemas.xmlsoap.org/soap/envelope/\" xmlns:ser=\"http://service3.base.module.n5ic/\">
-                       <soapenv:Header/>
-                       <soapenv:Body>
-                          <ser:documentObjectGetDocumentDescription>"+result_hash[:system_id]+"</ser:documentObjectGetDocumentDescription>
-                       </soapenv:Body>
-                    </soapenv:Envelope>"
-                  end
-      extra_hash = extra.to_hash[:document_object_get_document_description_response]
-      result_hash[:"title"] = extra_hash[:title]
-      result_hash[:"document_type"] = extra_hash[:document_type]
-      result_hash[:"description"] = extra_hash[:description]
-      return result_hash
-    end
-    
-    def get_file(file_id)
-      result = get_file_info(file_id)
-      file_result =    @@client.request :ser, :document_get do |soap|
-                    soap.xml = "<soapenv:Envelope xmlns:soapenv=\"http://schemas.xmlsoap.org/soap/envelope/\" xmlns:ser=\"http://service3.base.module.n5ic/\">
-                       <soapenv:Header/>
-                       <soapenv:Body>
-                          <ser:documentGet>"+file_id+"</ser:documentGet>
-                       </soapenv:Body>
-                    </soapenv:Envelope>"
-                  end
-      file_hash = file_result.to_hash[:document_get_response]
-      result[:"base64_data"] = file_hash
-      result[:"file_path"] = decode_file(result)
-      result.delete(:base64_data) # Releasing som memory hungry stuff
-      return result
     end
     
     def decode_file(hash)

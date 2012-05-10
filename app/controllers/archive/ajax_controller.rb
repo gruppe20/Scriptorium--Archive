@@ -18,19 +18,23 @@ module Archive
     # 66b2ed65-901c-437d-9d72-564dd00b3ef1
     def get_series
       render :json => @@shampoo.get_fonds_series(params[:fond_id])
-      # render :inline => @@shampoo.get_fonds_series(params[:fond_id]).to_json
     end
     
-    def get_case_files(series_id)
-      
+    def get_case_files
+      render :json => @@shampoo.get_case_files(params[:series_id])
     end
     
-    def get_child_case_files(case_file_id)
-      
+    def get_child_case_files
+      render :json => @@shampoo.get_child_case_files(params[:case_file_id])
+      #render :inline => @@shampoo.get_child_case_files(params[:case_file_id]).to_json
     end
     
-    def get_records(case_file_id)
-      
+    def get_records
+      render :json => @@shampoo.get_registry_entries(params[:case_file_id])
+    end
+    
+    def get_record
+      render :json => @@shampoo.get_record(params[:record_id])
     end
     
     def get_document_description(record_id)
