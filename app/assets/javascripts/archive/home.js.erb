@@ -1,7 +1,9 @@
+var prefix = "<%= Archive::Engine.routes._generate_prefix({}) %>/";
+
 $(document).ready(function() {
 	$.ajax({
 		type: "POST",
-		url: "/ajax/get_series",
+		url: prefix+"ajax/get_series",
 		data: "fond_id=66b2ed65-901c-437d-9d72-564dd00b3ef1"
 	}).done(function(data) {
 		update_data(data, "#students");
@@ -11,7 +13,7 @@ $(document).ready(function() {
 	$(document).on('click', '#students', function(e) {
 		$.ajax({
 			type: "POST",
-			url: "ajax/get_case_files",
+			url: prefix+"ajax/get_case_files",
 			data: "series_id="+$(this).attr("value")
 		}).done(function(data) {
 			update_data(data, "#subjects");
@@ -22,7 +24,7 @@ $(document).ready(function() {
 	$(document).on('click', '#subjects', function(e) {
 		$.ajax({
 			type: "POST",
-			url: "ajax/get_child_case_files",
+			url: prefix+"ajax/get_child_case_files",
 			data: "case_file_id="+$(this).attr("value")
 		}).done(function(data) {
 			update_data(data, "#assignment");
@@ -33,7 +35,7 @@ $(document).ready(function() {
 	$(document).on('click', '#assignment', function(e) {
 		$.ajax({
 			type: "POST",
-			url: "ajax/get_records",
+			url: prefix+"ajax/get_records",
 			data: "case_file_id="+$(this).attr("value")
 		}).done(function(data) {
 			update_data(data, "#record");
@@ -45,7 +47,7 @@ $(document).ready(function() {
 		console.log($(this).attr("value"));
 		$.ajax({
 			type: "POST",
-			url: "ajax/get_record",
+			url: prefix+"ajax/get_record",
 			data: "record_id="+$(this).attr("value")
 		}).done(function(data) {
 			console.log(data);
@@ -59,7 +61,7 @@ $(document).ready(function() {
 	$(document).on('click', '#get_file', function(e) {
 		$.ajax({
 			type: "GET",
-			url: "ajax/get_file",
+			url: prefix+"ajax/get_file",
 			data: "file_id="+$(this).attr("value")
 		});
 	});

@@ -1,4 +1,3 @@
-require "savon"
 require "base64"
 
 module Archive
