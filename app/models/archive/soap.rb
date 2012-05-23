@@ -1,4 +1,5 @@
 require "base64"
+require "savon"
 
 module Archive
   class SOAP
