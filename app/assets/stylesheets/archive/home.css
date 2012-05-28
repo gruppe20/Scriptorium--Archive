@@ -6,9 +6,7 @@ select {
 
 #record_details {
 	height: 300px;
-	width: 200px;
 	font-size: 25px;
-	position: absolute;
 	top: 0;
 	right: 0;
 }
